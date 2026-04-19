@@ -1,15 +1,14 @@
 # Shifted Color Slots
-This is where she makes a mod.
+A simple Geometry Dash (Geode) mod allowing you to shift the 1-9 color buttons in [Edit Object] by a configurable amount.
 
 <img src="logo.png" width="150" alt="the mod's logo" />
 
-*Update logo.png to change your mod's icon (please)*
+See [about.md](about.md) for configuration and caveats.
 
-## Getting started
-We recommend heading over to [the getting started section on our docs](https://docs.geode-sdk.org/getting-started/) for useful info on what to do next.
+I made this due to my strong muscle memory of colors 1-9, to comfortably build in collab parts that give a color offset.
 
 ## Build instructions
-For more info, see [our docs](https://docs.geode-sdk.org/getting-started/create-mod#build)
+For more info, see [Geode's docs](https://docs.geode-sdk.org/getting-started/create-mod#build)
 ```sh
 # Assuming you have the Geode CLI set up already
 geode build
