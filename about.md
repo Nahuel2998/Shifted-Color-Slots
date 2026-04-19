@@ -10,6 +10,7 @@ Useful for collab parts where your assigned colors are not 1-9 and you have very
 
 * **Offset**: The amount to offset by. Note how it's one less than the first button's color, so 10 gives colors 11-19.
 * **Update Labels**: Whether the buttons should have their actual number or stay as 1-9. Enabled by default, disable to have 1-9.
+* **In-Editor Menu**: Whether to show buttons to update the offset live in the editor. Enabled by default.
 
 ## Caveats
 

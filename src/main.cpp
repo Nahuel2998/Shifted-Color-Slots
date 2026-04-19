@@ -1,17 +1,29 @@
 #include <Geode/Geode.hpp>
-#include <Geode/binding/CustomizeObjectLayer.hpp>
 #include <Geode/modify/CustomizeObjectLayer.hpp>
 
 using namespace geode::prelude;
 
 #define CUSTOM_CHANNEL_ID 1008
 
-class $modify(CustomizeObjectLayer) {
+static constexpr std::string_view BUTTON_IDS[] = {
+    "channel-1-button",
+    "channel-2-button",
+    "channel-3-button",
+    "channel-4-button",
+    "channel-5-button",
+    "channel-6-button",
+    "channel-7-button",
+    "channel-8-button",
+    "channel-9-button",
+};
+
+class $modify(WithShiftedColorsCustomizeObjectLayer, CustomizeObjectLayer) {
     struct Fields {
         // Disables updating the selected button sprite and custom color labels
         bool m_skipVanillaCustomHandling = false;
     };
 
+    $override
     bool
     init(GameObject *object, cocos2d::CCArray *objects) {
 		if (!CustomizeObjectLayer::init(object, objects)) {
@@ -19,14 +31,22 @@ class $modify(CustomizeObjectLayer) {
 		}
 
         auto offset = Mod::get()->getSettingValue<int>("offset");
-        if (!offset) return true;
+        if (Mod::get()->getSettingValue<bool>("in-editor-menu")) {
+            setupColorShiftMenu(offset);
+        }
 
-        auto channelsMenu = getChildByIDRecursive("channels-menu");
-        if (!channelsMenu) return true; // Should be unreachable...
+        if (offset) updateButtonTags(offset);
+        return true;
+    }
+
+    bool
+    updateButtonTags(int offset) {
+        auto channelsMenu = m_mainLayer->getChildByID("channels-menu");
+        if (!channelsMenu) return false; // Should be unreachable...
 
         for (int tag = 1; tag < 10; tag++) {
-            auto button = channelsMenu->getChildByTag(tag);
-            auto sprite = static_cast<ButtonSprite*>(button->getChildByTag(tag));
+            auto button = channelsMenu->getChildByID(BUTTON_IDS[tag - 1]);
+            auto sprite = static_cast<ButtonSprite*>(button->getChildByTag(button->getTag()));
             if (!sprite) continue;
 
             int newtag = tag + offset;
@@ -42,6 +62,7 @@ class $modify(CustomizeObjectLayer) {
         return true;
     }
 
+    $override
     void
     updateCurrentSelection() {
         auto offset = Mod::get()->getSettingValue<int>("offset");
@@ -60,6 +81,7 @@ class $modify(CustomizeObjectLayer) {
     // and thus update m_customColorChannel and call updateCustomColorLabels() and highlightSelected()
     // When they're called, we want to skip those updates and call updateCurrentSelection() ourselves after
     // TODO: It's also inlined in onNextColorChannel() [Next Free]
+    $override
     void
     toggleVisible() {
         auto offset = Mod::get()->getSettingValue<int>("offset");
@@ -79,6 +101,7 @@ class $modify(CustomizeObjectLayer) {
         updateCurrentSelection();
     }
 
+    $override
     void
     colorSetupClosed(int id) {
         auto offset = Mod::get()->getSettingValue<int>("offset");
@@ -99,16 +122,58 @@ class $modify(CustomizeObjectLayer) {
     }
 
     // -- Functions guarded by skipVanillaCustomHandling
+    $override
     void
     updateCustomColorLabels() {
         if (m_fields->m_skipVanillaCustomHandling) return;
         CustomizeObjectLayer::updateCustomColorLabels();
     }
 
+    $override
     void
     highlightSelected(ButtonSprite *sprite) {
         if (m_fields->m_skipVanillaCustomHandling) return;
         CustomizeObjectLayer::highlightSelected(sprite);
+    }
+
+    // -- In-Editor Menu
+    void
+    setupColorShiftMenu(int initialOffset) {
+        auto menu = CCMenu::create();
+        menu->setID("color-shift-menu"_spr);
+        menu->setPositionX(90);
+
+        auto incrBtn = CCMenuItemSpriteExtra::create(
+            CCSprite::createWithSpriteFrameName("edit_leftBtn_001.png"),
+            this,
+            menu_selector(WithShiftedColorsCustomizeObjectLayer::onColorShiftButton)
+        );
+        incrBtn->setRotation(90);
+        incrBtn->setTag(+1);
+
+        auto decrBtn = CCMenuItemSpriteExtra::create(
+            CCSprite::createWithSpriteFrameName("edit_rightBtn_001.png"),
+            this,
+            menu_selector(WithShiftedColorsCustomizeObjectLayer::onColorShiftButton)
+        );
+        decrBtn->setRotation(90);
+        decrBtn->setTag(-1);
+
+        menu->addChild(incrBtn);
+        menu->addChild(decrBtn);
+
+        menu->setLayout(SimpleColumnLayout::create());
+        m_mainLayer->addChild(menu);
+    }
+
+    void
+    onColorShiftButton(CCObject *sender) {
+        auto setting = std::static_pointer_cast<SettingTypeForValueType<int>::SettingType>(Mod::get()->getSetting("offset"));
+        auto  offset = setting->getValue();
+        offset = std::clamp(offset + sender->getTag(), setting->getMinValue().value(), setting->getMaxValue().value());
+        setting->setValue(offset);
+
+        updateButtonTags(offset);
     }
 
     // -- Utils

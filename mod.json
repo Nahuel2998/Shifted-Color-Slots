@@ -28,6 +28,12 @@
             "name": "Update Labels",
             "description": "If checked, updates the button labels to their actual channel number.\n\nOtherwise, they're kept as 1-9.",
             "default": true
+        },
+        "in-editor-menu": {
+            "type": "bool",
+            "name": "In-Editor Menu",
+            "description": "Whether to show the in-editor offset-adjusting buttons.",
+            "default": true
         }
     }
 }
