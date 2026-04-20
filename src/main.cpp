@@ -20,7 +20,8 @@ static constexpr std::string_view BUTTON_IDS[] = {
 class $modify(WithShiftedColorsCustomizeObjectLayer, CustomizeObjectLayer) {
     struct Fields {
         // Disables updating the selected button sprite and custom color labels
-        bool m_skipVanillaCustomHandling = false;
+        bool       m_skipVanillaCustomHandling = false;
+        TextInput *m_shiftOffsetInput;
     };
 
     $override
@@ -139,14 +140,16 @@ class $modify(WithShiftedColorsCustomizeObjectLayer, CustomizeObjectLayer) {
     // -- In-Editor Menu
     void
     setupColorShiftMenu(int initialOffset) {
+        auto alertBg = m_mainLayer->getChildByID("alert-bg");
+        if (!alertBg) return;
+
         auto menu = CCMenu::create();
         menu->setID("color-shift-menu"_spr);
-        menu->setPositionX(90);
 
         auto incrBtn = CCMenuItemSpriteExtra::create(
             CCSprite::createWithSpriteFrameName("edit_leftBtn_001.png"),
             this,
-            menu_selector(WithShiftedColorsCustomizeObjectLayer::onColorShiftButton)
+            menu_selector(WithShiftedColorsCustomizeObjectLayer::onShiftOffsetButton)
         );
         incrBtn->setRotation(90);
         incrBtn->setTag(+1);
@@ -154,26 +157,57 @@ class $modify(WithShiftedColorsCustomizeObjectLayer, CustomizeObjectLayer) {
         auto decrBtn = CCMenuItemSpriteExtra::create(
             CCSprite::createWithSpriteFrameName("edit_rightBtn_001.png"),
             this,
-            menu_selector(WithShiftedColorsCustomizeObjectLayer::onColorShiftButton)
+            menu_selector(WithShiftedColorsCustomizeObjectLayer::onShiftOffsetButton)
         );
         decrBtn->setRotation(90);
         decrBtn->setTag(-1);
 
+        auto width = incrBtn->getContentWidth() * 2;
+
+        auto input = TextInput::create(width, "0");
+        input->setCommonFilter(CommonFilter::Uint);
+        input->setMaxCharCount(3);
+        input->setString(std::to_string(initialOffset).c_str());
+        input->setCallback([this](const std::string &text) {
+            int offset = 0;
+            if (text.length() != 0) {
+                offset = std::stoi(text);
+            }
+            setShiftOffset(offset);
+        });
+        m_fields->m_shiftOffsetInput = input;
+
         menu->addChild(incrBtn);
+        menu->addChild(input);
         menu->addChild(decrBtn);
 
-        menu->setLayout(SimpleColumnLayout::create());
         m_mainLayer->addChild(menu);
+
+        auto posX = alertBg->getPositionX() - alertBg->getContentWidth() / 2;
+        menu->setPositionX(posX);
+        menu->setAnchorPoint({1, 0.5});
+        menu->setContentWidth(width * 1.25);
+
+        menu->setLayout(SimpleColumnLayout::create());
     }
 
     void
-    onColorShiftButton(CCObject *sender) {
+    onShiftOffsetButton(CCObject *sender) { setShiftOffset(sender->getTag(), true); }
+
+    int
+    setShiftOffset(int newOffset, bool relative = false) {
         auto setting = std::static_pointer_cast<SettingTypeForValueType<int>::SettingType>(Mod::get()->getSetting("offset"));
-        auto  offset = setting->getValue();
-        offset = std::clamp(offset + sender->getTag(), setting->getMinValue().value(), setting->getMaxValue().value());
+        int   offset = newOffset;
+        if (relative) {
+            offset = setting->getValue() + newOffset;
+        }
+        offset = std::clamp(offset, (int)setting->getMinValue().value(), (int)setting->getMaxValue().value());
         setting->setValue(offset);
 
+        m_fields->m_shiftOffsetInput->setString(std::to_string(offset));
         updateButtonTags(offset);
+
+        return offset;
     }
 
     // -- Utils
