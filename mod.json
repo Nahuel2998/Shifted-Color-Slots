@@ -8,12 +8,21 @@
 	},
 	"id": "nahuel2998.shifted-color-slots",
 	"name": "Shifted Color Slots",
-	"version": "v1.0.0",
+	"version": "v1.0.1",
 	"developer": "Nahuel2998",
 	"description": "Allows for shifting the default 1-9 color slots in Edit Object",
 	"dependencies": {
 		"geode.node-ids": ">=v1.23.3"
 	},
+    "links": {
+        "source": "https://github.com/Nahuel2998/Shifted-Color-Slots"
+    },
+    "tags": [
+        "editor",
+        "enhancement",
+        "customization",
+        "offline"
+    ],
     "settings": {
         "offset": {
             "type": "int",
