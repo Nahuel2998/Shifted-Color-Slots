@@ -27,9 +27,8 @@ class $modify(WithShiftedColorsCustomizeObjectLayer, CustomizeObjectLayer) {
     $override
     bool
     init(GameObject *object, cocos2d::CCArray *objects) {
-		if (!CustomizeObjectLayer::init(object, objects)) {
-			return false;
-		}
+		if (!CustomizeObjectLayer::init(object, objects)) return false;
+        if (isBetterMenuRunning()) return true;
 
         auto offset = Mod::get()->getSettingValue<int>("offset");
         if (Mod::get()->getSettingValue<bool>("in-editor-menu")) {
@@ -67,6 +66,10 @@ class $modify(WithShiftedColorsCustomizeObjectLayer, CustomizeObjectLayer) {
     void
     updateCurrentSelection() {
         auto offset = Mod::get()->getSettingValue<int>("offset");
+        if (!offset || isBetterMenuRunning()) {
+            CustomizeObjectLayer::updateCurrentSelection();
+            return;
+        }
 
         int tag = getActiveMode(false);
         if (!isInOffsetRange(offset, tag) && 0 < tag && tag < 1000) {
@@ -86,7 +89,7 @@ class $modify(WithShiftedColorsCustomizeObjectLayer, CustomizeObjectLayer) {
     void
     toggleVisible() {
         auto offset = Mod::get()->getSettingValue<int>("offset");
-        if (!offset) {
+        if (!offset || isBetterMenuRunning()) {
             CustomizeObjectLayer::toggleVisible();
             return;
         }
@@ -106,7 +109,7 @@ class $modify(WithShiftedColorsCustomizeObjectLayer, CustomizeObjectLayer) {
     void
     colorSetupClosed(int id) {
         auto offset = Mod::get()->getSettingValue<int>("offset");
-        if (!offset) {
+        if (!offset || isBetterMenuRunning()) {
             CustomizeObjectLayer::colorSetupClosed(id);
             return;
         }
@@ -171,7 +174,8 @@ class $modify(WithShiftedColorsCustomizeObjectLayer, CustomizeObjectLayer) {
         input->setCallback([this](const std::string &text) {
             int offset = 0;
             if (text.length() != 0) {
-                offset = std::stoi(text);
+                auto res = numFromString<int>(text);
+                offset   = res.unwrapOrDefault();
             }
             setShiftOffset(offset);
         });
@@ -221,4 +225,12 @@ class $modify(WithShiftedColorsCustomizeObjectLayer, CustomizeObjectLayer) {
 
     static inline bool
     isInOffsetRange(int offset, int id) { return offset < id && id < offset + 10; }
+
+    static inline bool
+    isBetterMenuRunning() {
+        auto betterEdit = Loader::get()->getLoadedMod("hjfod.betteredit");
+        if (betterEdit == nullptr) return false;
+
+        return betterEdit->getSettingValue<bool>("new-color-menu");
+    }
 };

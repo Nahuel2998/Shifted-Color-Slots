@@ -1,5 +1,5 @@
 # Shifted Color Slots
-A simple Geometry Dash (Geode) mod allowing you to shift the 1-9 color buttons in [Edit Object] by a configurable amount.
+A simple Geometry Dash (Geode) mod allowing you to shift the 1-9 color buttons in `[Edit Object]` by a configurable amount.
 
 <img src="logo.png" width="150" alt="the mod's logo" />
 

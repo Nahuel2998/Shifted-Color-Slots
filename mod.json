@@ -8,7 +8,7 @@
 	},
 	"id": "nahuel2998.shifted-color-slots",
 	"name": "Shifted Color Slots",
-	"version": "v1.0.1",
+	"version": "v1.0.2",
 	"developer": "Nahuel2998",
 	"description": "Allows for shifting the default 1-9 color slots in Edit Object",
 	"dependencies": {

@@ -1,6 +1,6 @@
 # Shifted Color Slots
 
-A simple mod allowing you to shift the 1-9 color buttons in [Edit Object] by a configurable amount.
+A simple mod allowing you to shift the 1-9 color buttons in `[Edit Object]` by a configurable amount.
 
 Useful for collab parts where your assigned colors are not 1-9 and you have very strong muscle memory of using them.
 
@@ -12,7 +12,11 @@ Useful for collab parts where your assigned colors are not 1-9 and you have very
 * **Update Labels**: Whether the buttons should have their actual number or stay as 1-9. Enabled by default, disable to have 1-9.
 * **In-Editor Menu**: Whether to show buttons to update the offset live in the editor. Enabled by default.
 
+## Compatibility
+
+* **BetterEdit**: If its `[New Color Menu]` is enabled, this mod does nothing.
+
 ## Caveats
 
 This doesn't edit the minimum of 10 for the custom color slot, so you can't use it to select colors 1-9 when you've shifted past that. 
-You can however use the [Browse] tab for it.
+You can however use the `[Browse]` tab for it (or manually type the number).
